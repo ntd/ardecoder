@@ -109,7 +109,7 @@ In push mode, additionally the encoder data is sent without request
 whenever its position changes. The maximum rate of changes (i.e. the
 minimum time between two unsolicited responses) is customizable
 
-To enable push mode, use "`S`" followed by the rate time (in
+To enable push mode, use `"S"` followed by the rate time (in
 milliseconds) and a newline. To disable push mode and turn back in slave
 mode, specify a rate time of 0.
 
