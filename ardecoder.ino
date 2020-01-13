@@ -5,7 +5,9 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
+
 #include <stdint.h>
+#include <stdlib.h>
 
 /* Set to 1 to have echo enabled on USB */
 #undef  ECHO
@@ -16,6 +18,7 @@
 
 typedef struct {
     volatile int16_t raw;
+    int16_t          dumped;
     bool             homed;
 #if OVERFLOW
     volatile uint8_t skips;
@@ -24,6 +27,7 @@ typedef struct {
 } Encoder;
 
 static Encoder encoders[4] = { 0 };
+static long timeout = 0;
 
 
 static void
@@ -67,9 +71,9 @@ encoder_reset(Encoder *encoder, uint8_t mask)
 }
 
 static void
-encoder_dump_status(const Encoder *encoder)
+encoder_dump(const Encoder *encoder)
 {
-    Serial.print(encoder - encoders);
+    Serial.print(encoder - encoders + 1);
     Serial.print(" ");
     Serial.print(encoder->raw);
     Serial.print(" ");
@@ -81,6 +85,14 @@ encoder_dump_status(const Encoder *encoder)
     Serial.print("\n");
 }
 
+static void
+encoder_dump_if_changed(Encoder *encoder)
+{
+    if (encoder->dumped != encoder->raw) {
+        encoder_dump(encoder);
+        encoder->dumped = encoder->raw;
+    }
+}
 
 /**
  * Update raw counters on AB channel changes.
@@ -113,6 +125,22 @@ ISR(PCINT0_vect)
     encoder_reset(encoders + 3, bits & 0x08);
 }
 
+static bool
+handle_request(const char *request)
+{
+    if (request[1] == '\0') {
+        int n = request[0] - '0';
+        if (n >= 1 && n <=4) {
+            encoder_dump(encoders + n - 1);
+            return true;
+        }
+    } else if (request[0] == 'S') {
+        timeout = atoi(request + 1);
+        return true;
+    }
+    return false;
+}
+
 static void
 setup()
 {
@@ -133,20 +161,8 @@ setup()
 
     /* Setup serial communication on USB */
     Serial.begin(115200);
+    Serial.setTimeout(1000);
     Serial.println("!Started ardecoder");
-}
-
-static bool
-handle_request(const char *request)
-{
-    if (request[1] == '\0') {
-        int n = request[0] - '0';
-        if (n >= 1 && n <=4) {
-            encoder_dump_status(encoders + n - 1);
-            return true;
-        }
-    }
-    return false;
 }
 
 static void
@@ -154,24 +170,37 @@ loop()
 {
     static char request[32] = { 0 };
     static char *ptr = request;
-    char c = Serial.read();
-    if (c == '\n' || c == '\r') {
+    char ch;
+    if (Serial.readBytes(&ch, 1) == 0) {
+        /* Timeout on reading: dump encoder statuses (if needed) */
+        if (timeout > 0) {
+            encoder_dump_if_changed(encoders + 0);
+            encoder_dump_if_changed(encoders + 1);
+            encoder_dump_if_changed(encoders + 2);
+            encoder_dump_if_changed(encoders + 3);
+        }
+    } else if (ch == '\n' || ch == '\r') {
+        /* EOL encountered: execute the request */
         *ptr = '\0';
 #if ECHO
-        /* Echo of the request */
+        /* Echo enabled */
         Serial.print("#'");
         Serial.print(request);
         Serial.print("'\n");
 #endif
         if (! handle_request(request)) {
-            /* Unrecognized request */
+            /* Failure: unrecognized request */
             Serial.print("?'");
             Serial.print(request);
             Serial.print("'\n");
+        } else {
+            /* Success: always adjust the timeout (could be changed) */
+            Serial.setTimeout(timeout == 0 ? 1000 : timeout);
         }
         ptr = request;
-    } else if (c != -1 && ptr - request < 32) {
-        *ptr = (char) c;
+    } else if (ptr - request < 32) {
+        /* Append the new char to the request, if enough space left */
+        *ptr = ch;
         ++ptr;
     }
 }
