@@ -75,6 +75,48 @@ the PCINT2 interrupt handler, called whenever any of the PIND bits (i.e.
 any D0..D7 digital input) changes.
 
 
+PROTOCOL
+--------
+
+The communication protocol on the USB bus is text based, so it can be
+used it interactively with a serial console. Any request and response is
+expected to be newline terminated. Any newline type is accepted: `"\n"`,
+`"\r"` or `"\r\n"`. Any response starting with `"#"` is an informational
+message and could be safely ignored.
+
+### GET ENCODER DATA
+
+To query an encoder, just send its number (`1`, `2` or `3`) followed by
+a newline.
+
+- Example request: `"1\n"`
+- Example response: `"1 -581 0 1\r\n"`
+
+The returned fields are respectively:
+
+1. the number of the encoder (`1`, `2` or `3`, the same as the request);
+2. the raw counter value;
+3. `1` if homed (it passed through the Z phase), `0` otherwise;
+4. the number of times a phase was skipped (if `OVERFLOW` is enabled).
+
+### SLAVE OR PUSH MODE
+
+In slave mode (the default), you must manually get the encoder data via
+specific queries. For monitoring you must implement by yourself a
+polling loop.
+
+In push mode, additionally the encoder data is sent without request
+whenever its position changes. The maximum rate of changes (i.e. the
+minimum time between two unsolicited responses) is customizable
+
+To enable push mode, use "`S`" followed by the rate time (in
+milliseconds) and a newline. To disable push mode and turn back in slave
+mode, specify a rate time of 0.
+
+- Request to enable push mode every 0,2 s: `"S200\n"`
+- Request to disable push mode: `"S0\n"`
+
+
 LICENSE
 -------
 

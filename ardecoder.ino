@@ -82,7 +82,7 @@ encoder_dump(const Encoder *encoder)
     Serial.print(" ");
     Serial.print(encoder->skips);
 #endif
-    Serial.print("\n");
+    Serial.print("\r\n");
 }
 
 static void
@@ -160,7 +160,7 @@ setup()
     /* Setup serial communication on USB */
     Serial.begin(115200);
     Serial.setTimeout(1000);
-    Serial.println("#Started ardecoder");
+    Serial.print("#Started ardecoder\r\n");
 }
 
 static void
@@ -179,20 +179,21 @@ loop()
     } else if (ch == '\n' || ch == '\r') {
         /* EOL encountered: execute the request */
         *ptr = '\0';
-#if ECHO
-        /* Echo enabled */
-        Serial.print("#'");
-        Serial.print(request);
-        Serial.print("'\n");
-#endif
-        if (! handle_request(request)) {
+        if (ptr == request) {
+            /* Ignore spurious EOLs */
+        } else if (! handle_request(request)) {
             /* Failure: unrecognized request */
             Serial.print("?'");
             Serial.print(request);
-            Serial.print("'\n");
+            Serial.print("'\r\n");
         } else {
             /* Success: always adjust the timeout (could be changed) */
             Serial.setTimeout(timeout == 0 ? 1000 : timeout);
+#if ECHO
+            Serial.print("#'");
+            Serial.print(request);
+            Serial.print("'\r\n");
+#endif
         }
         ptr = request;
     } else if (ptr - request < 32) {
