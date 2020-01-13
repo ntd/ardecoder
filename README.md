@@ -28,6 +28,13 @@ You can skip any encoder, e.g. if you need to use the serial line (that
 in turn requires the `D0` and `D1` digital lines), just avoid connecting
 the first encoder.
 
+![Only encoder 2 connected](https://github.com/ntd/ardecoder/tree/master/photo.jpeg)
+
+To improve reliability, you can put photocouplers between encoder and
+arduino, as shown by the above example where only encoder 2 is connected
+([schematic](https://github.com/ntd/ardecoder/tree/master/ardecoder.pdf)).
+In that case remember to consider the maximum speed of the photocoupler.
+
 
 HOW DECODING WORKS
 ------------------
