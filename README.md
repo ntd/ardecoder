@@ -43,7 +43,7 @@ The code keeps the last state of A B phase (`old`) and compares it to
 the new state (`now`). Any variation will increase or decrease the
 counter (`raw`) depending on a lookup table (`lut`).
 
-If `OVERFLOW` is defined, it is checked if a step is skipped (e.g. when
+If `OVERFLOW` is defined, it is checked if a phase is skipped (e.g. when
 the encoder is turning too quickly) by leveraging another lookup table
 (`skp`). If that is the case, the counter is incremented or decremented
 by 2, depending on the last adjustment.

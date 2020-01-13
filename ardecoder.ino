@@ -1,17 +1,10 @@
 #include <stdint.h>
 
-#undef  DEBUGGING
+/* Set to 1 to have echo enabled on USB */
+#undef  ECHO
+
+/* Set to 1 to handle phase skips at cost of slowing down the reading */
 #define OVERFLOW  1
-
-
-#if DEBUGGING
-volatile bool error = false;
-
-ISR(BADISR_vect)
-{
-    error = true;
-}
-#endif
 
 
 volatile int16_t raw[4]   = { 0 };
@@ -121,10 +114,6 @@ response(int nenc)
     Serial.print(" ");
     Serial.print(skips[nenc]);
 #endif
-#if DEBUGGING
-    Serial.print(" ");
-    Serial.print(error ? 1 : 0);
-#endif
     Serial.print("\n");
 }
 
@@ -147,7 +136,7 @@ loop()
     char c = Serial.read();
     if (c == '\n' || c == '\r') {
         *ptr = '\0';
-#if DEBUGGING
+#if ECHO
         /* Echo of the command */
         Serial.print("#'");
         Serial.print(line);
