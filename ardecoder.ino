@@ -1,3 +1,10 @@
+/* ardecoder: decoding up to 4 encoder with Arduino Uno or Nano.
+ *
+ * Copyright (C) 2020  Nicola Fontana <ntd@entidi.it>
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
 #include <stdint.h>
 
 /* Set to 1 to have echo enabled on USB */
