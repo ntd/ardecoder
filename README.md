@@ -1,4 +1,4 @@
-Ardecoder: decoding up to 4 encoder with Arduino Uno or Nano.
+Ardecoder: decoding up to 3 encoder with Arduino Uno or Nano.
 
 
 ELECTRICAL CONNECTIONS
@@ -6,32 +6,28 @@ ELECTRICAL CONNECTIONS
 
 |     |               |
 | --- | ------------- |
-| D0  | Encoder 1 (A) |
-| D1  | Encoder 1 (B) |
-| D2  | Encoder 2 (A) |
-| D3  | Encoder 2 (B) |
-| D4  | Encoder 3 (A) |
-| D5  | Encoder 3 (B) |
-| D6  | Encoder 4 (A) |
-| D7  | Encoder 4 (B) |
+| D2  | Encoder 1 (A) |
+| D3  | Encoder 1 (B) |
+| D4  | Encoder 2 (A) |
+| D5  | Encoder 2 (B) |
+| D6  | Encoder 3 (A) |
+| D7  | Encoder 3 (B) |
 |     |               |
-| D8  | Encoder 1 (Z) |
-| D9  | Encoder 2 (Z) |
-| D10 | Encoder 3 (Z) |
-| D11 | Encoder 4 (Z) |
+| D9  | Encoder 1 (Z) |
+| D10 | Encoder 2 (Z) |
+| D11 | Encoder 3 (Z) |
 
 If fewer encoders are needed, do not connect them. This also works with
 incremental encoders without the Z index: in this case the counter will
 be set to 0 at startup and never reset.
 
-You can skip any encoder, e.g. if you need to use the serial line (that
-in turn requires the `D0` and `D1` digital lines), just avoid connecting
-the first encoder.
+You can skip any encoder, e.g. you are allowed to connect only encoder 2
+and 3 without using encoder 1.
 
-![Only encoder 2 connected](./photo.jpeg)
+![Only encoder 1 connected](./photo.jpeg)
 
-To improve reliability you can put photocouplers between encoder and
-arduino, as shown by the above example where only encoder 2 is connected
+To improve reliability, you can put photocouplers between encoder and
+arduino, as shown by the above example where only encoder 1 is connected
 (see [the schematic](./ardecoder.pdf) for details). In that case,
 remember to consider the maximum speed of the photocoupler too.
 

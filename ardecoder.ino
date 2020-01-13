@@ -1,4 +1,4 @@
-/* ardecoder: decoding up to 4 encoder with Arduino Uno or Nano.
+/* ardecoder: decoding up to 3 encoder with Arduino Uno or Nano.
  *
  * Copyright (C) 2020  Nicola Fontana <ntd@entidi.it>
  *
@@ -26,7 +26,7 @@ typedef struct {
 #endif
 } Encoder;
 
-static Encoder encoders[4] = { 0 };
+static Encoder encoders[3] = { 0 };
 static long timeout = 0;
 
 
@@ -103,10 +103,9 @@ ISR(PCINT2_vect)
     uint8_t now = PIND;
     static uint8_t old = 0x00;
 
-    encoder_update(encoders + 0, ((now & 0x03) << 2) + (old & 0x03));
-    encoder_update(encoders + 1,  (now & 0x0C) + ((old & 0x0C) >> 2));
-    encoder_update(encoders + 2, ((now & 0x30) + ((old & 0x30) >> 2)) >> 2);
-    encoder_update(encoders + 3, ((now & 0xC0) + ((old & 0xC0) >> 2)) >> 4);
+    encoder_update(encoders + 0,  (now & 0x0C) + ((old & 0x0C) >> 2));
+    encoder_update(encoders + 1, ((now & 0x30) + ((old & 0x30) >> 2)) >> 2);
+    encoder_update(encoders + 2, ((now & 0xC0) + ((old & 0xC0) >> 2)) >> 4);
 
     old = now;
 }
@@ -119,10 +118,9 @@ ISR(PCINT0_vect)
 {
     uint8_t bits = PINB;
 
-    encoder_reset(encoders + 0, bits & 0x01);
-    encoder_reset(encoders + 1, bits & 0x02);
-    encoder_reset(encoders + 2, bits & 0x04);
-    encoder_reset(encoders + 3, bits & 0x08);
+    encoder_reset(encoders + 0, bits & 0x02);
+    encoder_reset(encoders + 1, bits & 0x04);
+    encoder_reset(encoders + 2, bits & 0x08);
 }
 
 static bool
@@ -130,7 +128,7 @@ handle_request(const char *request)
 {
     if (request[1] == '\0') {
         int n = request[0] - '0';
-        if (n >= 1 && n <=4) {
+        if (n >= 1 && n <=3) {
             encoder_dump(encoders + n - 1);
             return true;
         }
@@ -144,13 +142,13 @@ handle_request(const char *request)
 static void
 setup()
 {
-    /* Set D0..D11 in input mode */
-    for (int pin = 0; pin <= 11; ++pin) {
+    /* Set D2..D11 in input mode */
+    for (int pin = 2; pin <= 11; ++pin) {
         pinMode(pin, INPUT_PULLUP);
     }
 
-    /* Enable interrupt on any change of D0..D7 */
-    PCMSK2 = 0xFF;
+    /* Enable interrupt on any change of D2..D7 */
+    PCMSK2 = 0xFC;
     PCIFR |= bit(PCIF2);
     PCICR |= bit(PCIE2);
 
@@ -162,7 +160,7 @@ setup()
     /* Setup serial communication on USB */
     Serial.begin(115200);
     Serial.setTimeout(1000);
-    Serial.println("!Started ardecoder");
+    Serial.println("#Started ardecoder");
 }
 
 static void
@@ -177,7 +175,6 @@ loop()
             encoder_dump_if_changed(encoders + 0);
             encoder_dump_if_changed(encoders + 1);
             encoder_dump_if_changed(encoders + 2);
-            encoder_dump_if_changed(encoders + 3);
         }
     } else if (ch == '\n' || ch == '\r') {
         /* EOL encountered: execute the request */
