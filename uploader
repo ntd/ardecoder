@@ -1,0 +1,12 @@
+#! /bin/sh
+
+error() {
+  cat >> /dev/stderr <<EOT
+Error: $1
+Usage: $0 HEXFILE
+EOT
+    exit 1
+}
+
+test -z "$1" && error "Missing HEXFILE"
+avrdude -v -patmega328p -carduino -P/dev/ttyUSB0 -b57600 -D -U "flash:w:$1:i"
