@@ -26,28 +26,31 @@ typedef struct {
 #endif
 } Encoder;
 
-static Encoder encoders[3] = { 0 };
-static long timeout = 0;
+Encoder encoders[3] = { 0 };
+long timeout = 0;
+const int8_t lut[] = {
+     0, +1, -1,  0,
+    -1,  0,  0, +1,
+    +1,  0,  0, -1,
+     0, -1, +1,  0
+};
+
+#if OVERFLOW
+const bool skp[] = {
+     false,  false,  false,  true,
+     false,  false,  true,   false,
+     false,  true,   false,  false,
+     true,   false,  false,  false
+};
+#endif
 
 
-static void
+void
 encoder_update(Encoder *encoder, uint8_t baba)
 {
     int8_t delta;
-    static const int8_t lut[] = {
-         0, +1, -1,  0,
-        -1,  0,  0, +1,
-        +1,  0,  0, -1,
-         0, -1, +1,  0
-    };
 
 #if OVERFLOW
-    static const bool skp[] = {
-         false,  false,  false,  true,
-         false,  false,  true,   false,
-         false,  true,   false,  false,
-         true,   false,  false,  false
-    };
     if (skp[baba]) {
         delta = encoder->last * 2;
         ++encoder->skips;
@@ -61,7 +64,7 @@ encoder_update(Encoder *encoder, uint8_t baba)
     encoder->raw += delta;
 }
 
-static void
+void
 encoder_reset(Encoder *encoder, uint8_t mask)
 {
     if (mask > 0) {
@@ -70,7 +73,7 @@ encoder_reset(Encoder *encoder, uint8_t mask)
     }
 }
 
-static void
+void
 encoder_dump(const Encoder *encoder)
 {
     Serial.print(encoder - encoders + 1);
@@ -85,7 +88,7 @@ encoder_dump(const Encoder *encoder)
     Serial.print("\r\n");
 }
 
-static void
+void
 encoder_dump_if_changed(Encoder *encoder)
 {
     if (encoder->dumped != encoder->raw) {
@@ -123,7 +126,7 @@ ISR(PCINT0_vect)
     encoder_reset(encoders + 2, bits & 0x08);
 }
 
-static bool
+bool
 handle_request(const char *request)
 {
     if (request[1] == '\0') {
@@ -139,7 +142,7 @@ handle_request(const char *request)
     return false;
 }
 
-static void
+void
 setup()
 {
     /* Set D2..D11 in input mode */
@@ -163,7 +166,7 @@ setup()
     Serial.print("#Started ardecoder\r\n");
 }
 
-static void
+void
 loop()
 {
     static char request[32] = { 0 };
