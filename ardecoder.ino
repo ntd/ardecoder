@@ -13,7 +13,7 @@
 #undef  ECHO
 
 /* Set to 1 to handle phase skips at cost of slowing down the reading */
-#define OVERFLOW  1
+#undef OVERFLOW
 
 
 typedef struct {
