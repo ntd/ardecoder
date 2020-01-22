@@ -31,6 +31,9 @@ arduino, as shown by the above example where only encoder 1 is connected
 (see [the schematic](./ardecoder.pdf) for details). In that case,
 remember to consider the maximum speed of the photocoupler too.
 
+A [public video](https://www.youtube.com/watch?v=IgxP2A8nXgc) shows
+another example on Arduino UNO without photocouplers.
+
 
 HOW DECODING WORKS
 ------------------
