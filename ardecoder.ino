@@ -9,6 +9,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+/* The number of encoders connected: 1, 2 or 3 */
+#define NENCODERS 3
+
 /* Undefine to disable homing, e.g. your encoders do not have Z index */
 #define HOME 1
 
@@ -28,7 +31,7 @@ typedef struct {
 #endif
 } Encoder;
 
-Encoder encoders[3] = { 0 };
+Encoder encoders[NENCODERS] = { 0 };
 long timeout = 0;
 const int8_t lut[] = {
      0, +1, -1,  0,
@@ -113,8 +116,12 @@ ISR(PCINT2_vect)
     static uint8_t old = 0x00;
 
     encoder_update(encoders + 0,  (now & 0x0C) + ((old & 0x0C) >> 2));
+#if NENCODERS > 1
     encoder_update(encoders + 1, ((now & 0x30) + ((old & 0x30) >> 2)) >> 2);
+#endif
+#if NENCODERS > 2
     encoder_update(encoders + 2, ((now & 0xC0) + ((old & 0xC0) >> 2)) >> 4);
+#endif
 
     old = now;
 }
@@ -129,8 +136,12 @@ ISR(PCINT0_vect)
     uint8_t bits = PINB;
 
     encoder_reset(encoders + 0, bits & 0x02);
+#if NENCODERS > 1
     encoder_reset(encoders + 1, bits & 0x04);
+#endif
+#if NENCODERS > 2
     encoder_reset(encoders + 2, bits & 0x08);
+#endif
 }
 #endif
 
@@ -139,7 +150,7 @@ handle_request(const char *request)
 {
     if (request[1] == '\0') {
         int n = request[0] - '0';
-        if (n >= 1 && n <=3) {
+        if (n >= 1 && n <= NENCODERS) {
             encoder_dump(encoders + n - 1);
             return true;
         }
@@ -153,20 +164,25 @@ handle_request(const char *request)
 void
 setup()
 {
-    /* Enable interrupt on any change of D2..D7 */
-    for (int pin = 2; pin <= 7; ++pin) {
+    int pin, mask;
+
+    /* Enable interrupt on any change of D2..{D3, D5 or D7} */
+    pin = NENCODERS * 2 + 1;
+    for (int pin = 0; pin <= NENCODERS * 2 + 1; ++pin) {
         pinMode(pin, INPUT_PULLUP);
     }
-    PCMSK2 = 0xFC;
+    /* 0x0C for 1, 0x3C for 2 and 0xFC for 3 */
+    PCMSK2 = (1 << (2 * NENCODERS + 2)) - 4;
     PCIFR |= bit(PCIF2);
     PCICR |= bit(PCIE2);
 
 #if HOME
-    /* Enable interrupt on any change of D9..D11 (home handling) */
+    /* Enable interrupt on D9..{D9, D10 or D11} (home handling) */
     for (int pin = 9; pin <= 11; ++pin) {
         pinMode(pin, INPUT_PULLUP);
     }
-    PCMSK0 = 0x0E;
+    /* 0x02 for 1, 0x06 for 2 and 0x0E for 3 */
+    PCMSK0 = (1 << (NENCODERS + 1)) - 2;
     PCIFR |= bit(PCIF0);
     PCICR |= bit(PCIE0);
 #endif
@@ -187,8 +203,12 @@ loop()
         /* Timeout on reading: dump encoder statuses (if needed) */
         if (timeout > 0) {
             encoder_dump_if_changed(encoders + 0);
+#if NENCODERS > 1
             encoder_dump_if_changed(encoders + 1);
+#endif
+#if NENCODERS > 2
             encoder_dump_if_changed(encoders + 2);
+#endif
         }
     } else if (ch == '\n' || ch == '\r') {
         /* EOL encountered: execute the request */
