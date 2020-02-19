@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-/* Undefine if you do not whant homing, e.g. encoder without Z channel */
+/* Undefine if you do not want homing, e.g. encoder without Z channel */
 #define HOME 1
 
 /* Set to 1 to handle phase skips at cost of slowing down the reading */
