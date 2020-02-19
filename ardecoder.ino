@@ -9,6 +9,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+/* Undefine if you do not whant homing, e.g. encoder without Z channel */
+#define HOME 1
+
 /* Set to 1 to have echo enabled on USB */
 #undef  ECHO
 
@@ -19,7 +22,9 @@
 typedef struct {
     volatile int16_t raw;
     int16_t          dumped;
+#if HOME
     bool             homed;
+#endif
 #if OVERFLOW
     volatile uint8_t skips;
     volatile int8_t  last;
@@ -68,7 +73,9 @@ void
 encoder_reset(Encoder *encoder, uint8_t mask)
 {
     if (mask > 0) {
+#if HOME
         encoder->homed = true;
+#endif
         encoder->raw   = 0;
     }
 }
@@ -79,8 +86,10 @@ encoder_dump(const Encoder *encoder)
     Serial.print(encoder - encoders + 1);
     Serial.print(" ");
     Serial.print(encoder->raw);
+#if HOME
     Serial.print(" ");
     Serial.print(encoder->homed ? "1" : "0");
+#endif
 #if OVERFLOW
     Serial.print(" ");
     Serial.print(encoder->skips);
@@ -113,6 +122,7 @@ ISR(PCINT2_vect)
     old = now;
 }
 
+#if HOME
 /**
  * Reset counters on zero signal.
  * PINB holds the states of digital inputs D8..D13.
@@ -125,6 +135,7 @@ ISR(PCINT0_vect)
     encoder_reset(encoders + 1, bits & 0x04);
     encoder_reset(encoders + 2, bits & 0x08);
 }
+#endif
 
 bool
 handle_request(const char *request)
@@ -145,20 +156,23 @@ handle_request(const char *request)
 void
 setup()
 {
-    /* Set D2..D11 in input mode */
-    for (int pin = 2; pin <= 11; ++pin) {
+    /* Enable interrupt on any change of D2..D7 */
+    for (int pin = 2; pin <= 7; ++pin) {
         pinMode(pin, INPUT_PULLUP);
     }
-
-    /* Enable interrupt on any change of D2..D7 */
     PCMSK2 = 0xFC;
     PCIFR |= bit(PCIF2);
     PCICR |= bit(PCIE2);
 
-    /* Enable interrupt on any change of D9..D11 */
+#if HOME
+    /* Enable interrupt on any change of D9..D11 (home handling) */
+    for (int pin = 9; pin <= 11; ++pin) {
+        pinMode(pin, INPUT_PULLUP);
+    }
     PCMSK0 = 0x0E;
     PCIFR |= bit(PCIF0);
     PCICR |= bit(PCIE0);
+#endif
 
     /* Setup serial communication on USB */
     Serial.begin(115200);
