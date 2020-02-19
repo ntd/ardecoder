@@ -12,9 +12,6 @@
 /* Undefine if you do not whant homing, e.g. encoder without Z channel */
 #define HOME 1
 
-/* Set to 1 to have echo enabled on USB */
-#undef  ECHO
-
 /* Set to 1 to handle phase skips at cost of slowing down the reading */
 #undef OVERFLOW
 
@@ -206,11 +203,6 @@ loop()
         } else {
             /* Success: always adjust the timeout (could be changed) */
             Serial.setTimeout(timeout == 0 ? 1000 : timeout);
-#if ECHO
-            Serial.print("#'");
-            Serial.print(request);
-            Serial.print("'\r\n");
-#endif
         }
         ptr = request;
     } else if (ptr - request < 32) {
