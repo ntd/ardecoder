@@ -155,8 +155,8 @@ setup()
     PCIFR |= bit(PCIF2);
     PCICR |= bit(PCIE2);
 
-    /* Enable interrupt on any change of D8..D11 */
-    PCMSK0 = 0x0F;
+    /* Enable interrupt on any change of D9..D11 */
+    PCMSK0 = 0x0E;
     PCIFR |= bit(PCIF0);
     PCICR |= bit(PCIE0);
 
