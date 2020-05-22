@@ -167,8 +167,7 @@ setup()
     int pin, mask;
 
     /* Enable interrupt on any change of D2..{D3, D5 or D7} */
-    pin = NENCODERS * 2 + 1;
-    for (int pin = 0; pin <= NENCODERS * 2 + 1; ++pin) {
+    for (pin = 0; pin <= NENCODERS * 2 + 1; ++pin) {
         pinMode(pin, INPUT_PULLUP);
     }
     /* 0x0C for 1, 0x3C for 2 and 0xFC for 3 */
@@ -178,7 +177,7 @@ setup()
 
 #if HOME
     /* Enable interrupt on D9..{D9, D10 or D11} (home handling) */
-    for (int pin = 9; pin <= 11; ++pin) {
+    for (pin = 9; pin <= NENCODERS + 8; ++pin) {
         pinMode(pin, INPUT_PULLUP);
     }
     /* 0x02 for 1, 0x06 for 2 and 0x0E for 3 */
