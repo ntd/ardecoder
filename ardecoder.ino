@@ -70,17 +70,6 @@ encoder_update(Encoder *encoder, uint8_t baba)
 }
 
 void
-encoder_reset(Encoder *encoder, uint8_t mask)
-{
-    if (mask > 0) {
-#if HOME
-        encoder->homed = true;
-#endif
-        encoder->raw   = 0;
-    }
-}
-
-void
 encoder_dump(const Encoder *encoder)
 {
     Serial.print(encoder - encoders + 1);
@@ -127,6 +116,15 @@ ISR(PCINT2_vect)
 }
 
 #if HOME
+void
+encoder_reset(Encoder *encoder, uint8_t mask)
+{
+    if (mask == 0) {
+        encoder->homed = true;
+        encoder->raw   = 0;
+    }
+}
+
 /**
  * Reset counters on zero signal.
  * PINB holds the states of digital inputs D8..D13.
