@@ -78,6 +78,19 @@ the PCINT2 interrupt handler, called whenever any of the PIND bits (i.e.
 any D0..D7 digital input) changes.
 
 
+PERFORMANCES
+------------
+
+No serious attempts at counting CPU cycles has been performed. I am not
+even sure how much the serial communication impacts the overall
+performance but I am pretty confident this thing can read more than 20K
+steps per second with 3 encoders enabled and `OVERFLOW` disabled.
+
+On real test cases I have seen counting more than 30K steps per seconds
+(more than 3K steps in 0.1 seconds, to be exact) but I think I am just
+hitting the speed limit of the photocouplers I used.
+
+
 PROTOCOL
 --------
 
