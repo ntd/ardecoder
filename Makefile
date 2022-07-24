@@ -1,12 +1,19 @@
+# For Arduino NANO use:
+#
+#     make upload
+#
+# For old Arduino NANO (prior than 2018) use:
+#
+#     make MODEL=nano:cpu=atmega328old upload
+#
 # For Arduino UNO use:
 #
-#     make MODEL=uno BAUD=115200
+#     make MODEL=uno upload
 #
-MODEL=nano:cpu=atmega328
+MODEL=nano
 DEVICE=/dev/ttyUSB0
-BAUD=57600
-BUILDER=arduino-builder -build-path build -fqbn archlinux-arduino:avr:$(MODEL) -hardware /usr/share/arduino/hardware -tools /usr/bin "$$1"
-UPLOADER=avrdude -v -patmega328p -carduino -P$(DEVICE) -b$(BAUD) -D -U "flash:w:$$1:i"
+BUILDER=arduino-cli compile --fqbn arduino:avr:$(MODEL) --build-path build "$$1"
+UPLOADER=arduino-cli upload --fqbn arduino:avr:$(MODEL) -p $(DEVICE) -vti "$$1"
 
 all: build/ardecoder.ino.hex
 

@@ -1,6 +1,28 @@
 Ardecoder: decoding up to 3 encoder with Arduino Uno or Nano.
 
 
+INSTALLATION
+------------
+
+Ensure the Arduino board is connected to your system.
+
+For Arduino NANO use:
+
+    make upload
+
+For old Arduino NANO (prior than 2018) use:
+
+    make MODEL=nano:cpu=atmega328old upload
+
+For Arduino UNO use:
+
+    make MODEL=uno upload
+
+By default, the makefile expects the board to be connected to the
+`/dev/ttyUSB0` device. If this is not the case, you can explicitly
+specify another device, e.g. `make DEVICE=/dev/ttyS1 MODEL=uno upload`.
+
+
 ELECTRICAL CONNECTIONS
 ----------------------
 
