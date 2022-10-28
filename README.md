@@ -95,7 +95,7 @@ CCW <--      _______         _______         __  --> CW
 | 1 1 | 1 0 |  +1 | false |
 | 1 1 | 1 1 |   0 | false |  No movement
 
-All 4 counters are adjusted according to the above decoding algorithm by
+All 3 counters are adjusted according to the above decoding algorithm by
 the PCINT2 interrupt handler, called whenever any of the PIND bits (i.e.
 any D0..D7 digital input) changes.
 
