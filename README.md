@@ -117,10 +117,10 @@ PROTOCOL
 --------
 
 The communication protocol on the USB bus is text based, so it can be
-used it interactively with a serial console. Any request and response is
-expected to be newline terminated. Any newline type is accepted: `"\n"`,
-`"\r"` or `"\r\n"`. Any response starting with `"#"` is an informational
-message and could be safely ignored.
+used interactively with a serial console. Requests and responses are
+expected to be newline terminated, and any newline format is accepted:
+`"\n"`, `"\r"` or `"\r\n"`. Anything between `"#"` and a newline is
+considered a comment and it is ignored.
 
 ### GET ENCODER DATA
 
