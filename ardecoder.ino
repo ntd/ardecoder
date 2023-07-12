@@ -193,7 +193,7 @@ setup()
 void
 loop()
 {
-    static char request[32] = { 0 };
+    static char request[32 + 1] = { 0 };
     static char *ptr = request;
     char ch;
     if (Serial.readBytes(&ch, 1) == 0) {
