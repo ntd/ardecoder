@@ -193,6 +193,9 @@ setup()
 void
 loop()
 {
+    /* The longest command should be about 7 bytes long (e.g.
+     * "s9999\r\n") so limiting the request size to 32 bytes seems to
+     * be good enough for just about everything */
     static char request[32 + 1] = { 0 };
     static char *ptr = request;
     char ch;
